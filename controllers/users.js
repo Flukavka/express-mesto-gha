@@ -4,15 +4,19 @@ module.exports.getUsers = (_req, res) => User.find({})
   .then((users) => res.status(200).send(users))
   .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 
-module.exports.getUser = (_req, res) => User.findById
-  .then((user) => {
-    if (!user) {
-      return res.status(404).send({ message: 'Нет пользователя с таким id' });
-    }
+module.exports.getUser = (req, res) => {
+  const { id } = req.params;
 
-    return res.status(200).send(user);
-  })
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Нет пользователя с таким id' });
+      }
+
+      return res.status(200).send(user);
+    })
+    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+};
 
 module.exports.createUser = (req, res) => User.create({ ...req.body })
   .then((user) => res.status(201).send(user))
