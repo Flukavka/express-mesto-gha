@@ -25,6 +25,10 @@ app.use(express.json());
 app.use(routesUsers);
 app.use(routesCards);
 
+app.use('*', (_req, res) => {
+  res.status(404).json({ message: 'Страница не найдена' });
+});
+
 //  слушаем ПОРТ для подключения
 app.listen(PORT, () => {
   // eslint-disable-next-line consistent-return

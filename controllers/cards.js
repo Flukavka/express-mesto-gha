@@ -46,7 +46,15 @@ module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.card
 
     res.status(200).send(card);
   })
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({
+        message: 'Некорректный id карточки',
+      });
+
+      res.status(500).send({ message: 'Произошла ошибка' });
+    }
+  });
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
