@@ -59,14 +59,12 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
       return res.status(404).send({ message: 'Нет карточки с таким id' });
     }
 
-    res.status(200).send(card);
+    return res.status(200).send(card);
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({
-        message: `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`,
+        message: 'Некорректный id карточки',
       });
 
       res.status(500).send({ message: 'Произошла ошибка' });
