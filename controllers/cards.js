@@ -1,11 +1,19 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
+const {
+  OK_STATUS,
+  CREATED_SUCCESS_STATUS,
+  BAD_REQUEST_ERROR,
+  NOT_FOUND_ERROR,
+  INTERNAL_SERVER_ERROR,
+} = require('../utils/constants');
 
 module.exports.getCards = (_req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
+    .then((cards) => res.status(OK_STATUS).send(cards))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(BAD_REQUEST_ERROR).send({
           message: `${Object.values(err.errors)
             .map((error) => error.message)
             .join(', ')}`,
@@ -13,7 +21,7 @@ module.exports.getCards = (_req, res) => {
         return;
       }
 
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -22,10 +30,10 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
 
   return Card.create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(CREATED_SUCCESS_STATUS).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(BAD_REQUEST_ERROR).send({
           message: `${Object.values(err.errors)
             .map((error) => error.message)
             .join(', ')}`,
@@ -41,18 +49,18 @@ module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.card
   // eslint-disable-next-line consistent-return
   .then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Нет карточки с таким id' });
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
     }
 
-    res.status(200).send(card);
+    res.status(OK_STATUS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({
+    if (err instanceof mongoose.Error.CastError) {
+      res.status(BAD_REQUEST_ERROR).send({
         message: 'Некорректный id карточки',
       });
 
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     }
   });
 
@@ -64,18 +72,18 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   // eslint-disable-next-line consistent-return
   .then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Нет карточки с таким id' });
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
     }
 
-    return res.status(200).send(card);
+    return res.status(OK_STATUS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({
+    if (err instanceof mongoose.Error.CastError) {
+      res.status(BAD_REQUEST_ERROR).send({
         message: 'Некорректный id карточки',
       });
 
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     }
   });
 
@@ -87,17 +95,17 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   // eslint-disable-next-line consistent-return
   .then((card) => {
     if (!card) {
-      return res.status(404).send({ message: 'Нет карточки с таким id' });
+      return res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
     }
 
-    res.status(200).send(card);
+    res.status(OK_STATUS).send(card);
   })
   .catch((err) => {
-    if (err.name === 'CastError') {
-      res.status(400).send({
+    if (err instanceof mongoose.Error.CastError) {
+      res.status(BAD_REQUEST_ERROR).send({
         message: 'Некорректный id карточки',
       });
 
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     }
   });

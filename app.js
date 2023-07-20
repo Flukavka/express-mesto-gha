@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routesUsers = require('./routes/users');
-const routesCards = require('./routes/cards');
+const routes = require('./routes/index');
 
 const { PORT = 3000 } = process.env;
 
@@ -20,14 +19,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use(express.json());
-
-app.use(routesUsers);
-app.use(routesCards);
-
-app.use('*', (_req, res) => {
-  res.status(404).json({ message: 'Страница не найдена' });
-});
+app.use('/', routes);
 
 //  слушаем ПОРТ для подключения
 app.listen(PORT, () => {

@@ -10,18 +10,18 @@ const {
 } = require('../controllers/users');
 
 //  получает данные пользователей
-router.get('/users', getUsers);
+router.get('/', getUsers);
 
 //  находит пользователя по id
-router.get('/users/:id', getUser);
+router.get('/:id', getUser);
 
 //  создаёт пользователя
-router.post('/users', express.json(), createUser);
+router.post('/', createUser);
 
 //  обновляет профиль
-router.patch('/users/me', updateUserProfile);
+router.patch('/me', updateUserProfile);
 
 //  обновляет аватар
-router.patch('/users/me/avatar', updateUserAvatar);
+router.patch('/me/avatar', updateUserAvatar);
 
 module.exports = router;
