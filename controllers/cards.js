@@ -60,8 +60,10 @@ module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.card
         message: 'Некорректный id карточки',
       });
 
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      return;
     }
+
+    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
   });
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
@@ -83,8 +85,10 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
         message: 'Некорректный id карточки',
       });
 
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      return;
     }
+
+    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
   });
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
@@ -106,6 +110,8 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
         message: 'Некорректный id карточки',
       });
 
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      return;
     }
+
+    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
   });

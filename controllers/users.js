@@ -78,8 +78,10 @@ module.exports.updateUserProfile = (req, res) => {
             .join(', ')}`,
         });
 
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        return;
       }
+
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -108,7 +110,9 @@ module.exports.updateUserAvatar = (req, res) => {
             .join(', ')}`,
         });
 
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        return;
       }
+
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
