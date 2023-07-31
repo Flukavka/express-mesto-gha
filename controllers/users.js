@@ -1,18 +1,75 @@
-const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   OK_STATUS,
   CREATED_SUCCESS_STATUS,
-  BAD_REQUEST_ERROR,
   NOT_FOUND_ERROR,
-  INTERNAL_SERVER_ERROR,
 } = require('../utils/constants');
 
-module.exports.getUsers = (_req, res) => User.find({})
-  .then((users) => res.status(OK_STATUS).send(users))
-  .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' }));
+module.exports.createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      ...req.body,
+      password: hash,
+    }))
+    .then((user) => {
+      res.status(CREATED_SUCCESS_STATUS).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
+    .catch((err) => {
+      next(err);
+    })
+    .catch(next);
+};
 
-module.exports.getUser = (req, res) => {
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+
+      return res.status(OK_STATUS).send({ token });
+    })
+    .catch((err) => {
+      next(err);
+    })
+    .catch(next);
+};
+
+module.exports.getCurrentUserInfo = (req, res, next) => {
+  const id = req.user._id;
+
+  User.findById(id)
+    // eslint-disable-next-line consistent-return
+    .then((user) => {
+      if (user) {
+        return res.status(OK_STATUS).send(user);
+      }
+    })
+    .catch((err) => {
+      next(err);
+    })
+    .catch(next);
+};
+
+module.exports.getUsers = (_req, res, next) => User.find({})
+  .then((users) => res.status(OK_STATUS).send(users))
+  .catch((err) => {
+    next(err);
+  })
+  .catch(next);
+
+module.exports.getUser = (req, res, next) => {
   const { id } = req.params;
 
   User.findById(id)
@@ -24,35 +81,12 @@ module.exports.getUser = (req, res) => {
       return res.status(OK_STATUS).send(user);
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        res.status(BAD_REQUEST_ERROR).send({
-          message: 'Некорректный id пользователя',
-        });
-
-        return;
-      }
-
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => User.create({ ...req.body })
-  .then((user) => res.status(CREATED_SUCCESS_STATUS).send(user))
-  .catch((err) => {
-    if (err instanceof mongoose.Error.ValidationError) {
-      res.status(BAD_REQUEST_ERROR).send({
-        message: `${Object.values(err.errors)
-          .map((error) => error.message)
-          .join(', ')}`,
-      });
-
-      return;
-    }
-
-    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-  });
-
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   const id = req.user._id;
 
@@ -63,29 +97,17 @@ module.exports.updateUserProfile = (req, res) => {
       { returnDocument: 'after', runValidators: true, new: true },
     )
     .then((user) => {
-      if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Пользователь с указанным id не найден' });
-        return;
+      if (user) {
+        res.status(OK_STATUS).send({ name, about });
       }
-
-      res.status(OK_STATUS).send({ name, about });
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(BAD_REQUEST_ERROR).send({
-          message: `${Object.values(err.errors)
-            .map((error) => error.message)
-            .join(', ')}`,
-        });
-
-        return;
-      }
-
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const id = req.user._id;
 
@@ -95,24 +117,12 @@ module.exports.updateUserAvatar = (req, res) => {
     { returnDocument: 'after', runValidators: true, new: true },
   )
     .then((user) => {
-      if (!user) {
-        res.status(NOT_FOUND_ERROR).send({ message: 'Пользователь с указанным id не найден' });
-        return;
+      if (user) {
+        res.status(OK_STATUS).send({ avatar });
       }
-
-      res.status(OK_STATUS).send({ avatar });
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(BAD_REQUEST_ERROR).send({
-          message: `${Object.values(err.errors)
-            .map((error) => error.message)
-            .join(', ')}`,
-        });
-
-        return;
-      }
-
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+      next(err);
+    })
+    .catch(next);
 };

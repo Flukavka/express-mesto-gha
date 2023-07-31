@@ -1,10 +1,12 @@
 const express = require('express');
+//  const { celebrate, Joi } = require('celebrate');
 
 const router = express.Router();
+const { auth } = require('../middlewares/auth');
 const {
   getUsers,
+  getCurrentUserInfo,
   getUser,
-  createUser,
   updateUserProfile,
   updateUserAvatar,
 } = require('../controllers/users');
@@ -12,11 +14,11 @@ const {
 //  получает данные пользователей
 router.get('/', getUsers);
 
+//  получает данные залогиненного пользователя
+router.get('/me', auth, getCurrentUserInfo);
+
 //  находит пользователя по id
 router.get('/:id', getUser);
-
-//  создаёт пользователя
-router.post('/', createUser);
 
 //  обновляет профиль
 router.patch('/me', updateUserProfile);
