@@ -1,5 +1,5 @@
 const express = require('express');
-//  const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 
 const router = express.Router();
 const { auth } = require('../middlewares/auth');
@@ -18,12 +18,25 @@ router.get('/', getUsers);
 router.get('/me', auth, getCurrentUserInfo);
 
 //  находит пользователя по id
-router.get('/:id', getUser);
+router.get('/:id', celebrate({
+  body: Joi.object().keys({
+    id: Joi.string().length(24)/* .hex() */,
+  }).unknown(true),
+}), getUser);
 
 //  обновляет профиль
-router.patch('/me', updateUserProfile);
+router.patch('/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+  }).unknown(true),
+}), updateUserProfile);
 
 //  обновляет аватар
-router.patch('/me/avatar', updateUserAvatar);
+router.patch('/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().pattern(/(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)+\.(ru|com)))(:\d{2,5})?((\/.+)+)?\/?#?/),
+  }).unknown(true),
+}), updateUserAvatar);
 
 module.exports = router;

@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const BadRequestError = require('../errors/bad_request_error');
 const UnauthorizedError = require('../errors/unauthorized_error');
 const NotFoundError = require('../errors/not_found_error');
+const ConflictError = require('../errors/conflict_error');
 //  const Forbidden = require('../errors/forbidden_status');
 const {
   UNAUTHORIZED_ERROR,
   INTERNAL_SERVER_ERROR,
-  //  FORBIDDEN_STATUS,
 } = require('../utils/constants');
 
 // eslint-disable-next-line consistent-return
@@ -16,7 +16,7 @@ module.exports.errorMiddleware = (error, _req, res, next) => {
   }
 
   if (error.code === 11000) {
-    return next(new UnauthorizedError('Пользователь с такой почтой уже зарегистрирован'));
+    return next(new ConflictError('Пользователь с такой почтой уже зарегистрирован'));
   }
 
   if (error.statusCode === UNAUTHORIZED_ERROR) {
