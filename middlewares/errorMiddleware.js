@@ -3,7 +3,6 @@ const BadRequestError = require('../errors/bad_request_error');
 const UnauthorizedError = require('../errors/unauthorized_error');
 const NotFoundError = require('../errors/not_found_error');
 const ConflictError = require('../errors/conflict_error');
-//  const Forbidden = require('../errors/forbidden_status');
 const {
   UNAUTHORIZED_ERROR,
   INTERNAL_SERVER_ERROR,
@@ -30,10 +29,6 @@ module.exports.errorMiddleware = (error, _req, res, next) => {
   if (error instanceof mongoose.Error.DocumentNotFoundError) {
     return next(new NotFoundError('Объект с указанным id отсутствует'));
   }
-
-  /* if (error.statusCode === FORBIDDEN_STATUS) {
-    return next(new Forbidden('Отказано в доступе'));
-  } */
 
   res
     .status(INTERNAL_SERVER_ERROR)

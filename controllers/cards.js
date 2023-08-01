@@ -34,7 +34,7 @@ module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
     if (!card) {
       res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
     } else if (card.owner.toString() === req.user._id) {
-      Card.findByIdAndRemove(req.params.cardId).then(() => res.status(OK_STATUS).send(card));
+      return Card.findByIdAndRemove(req.params.cardId).then(() => res.status(OK_STATUS).send(card));
     }
 
     res.status(FORBIDDEN_STATUS).send({ message: 'Отказано в доступе' });
