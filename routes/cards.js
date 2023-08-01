@@ -24,22 +24,22 @@ router.post('/', celebrate({
 
 //  удаляет карточку по идентификатору
 router.delete('/:cardId', celebrate({
-  body: Joi.object().keys({
-    id: Joi.string().length(24).hex().required(),
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
   }).unknown(true),
 }), deleteCard);
 
 //  поставить лайк карточке
 router.put('/:cardId/likes', celebrate({
-  body: Joi.object().keys({
-    id: Joi.string().length(24).hex().required(),
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
   }).unknown(true),
 }), likeCard);
 
 //  убрать лайк с карточки
 router.delete('/:cardId/likes', celebrate({
-  body: Joi.object().keys({
-    id: Joi.string().length(24).hex().required(),
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
   }).unknown(true),
 }), dislikeCard);
 
