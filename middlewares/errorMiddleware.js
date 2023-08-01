@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 const BadRequestError = require('../errors/bad_request_error');
-const UnauthorizedError = require('../errors/unauthorized_error');
 const NotFoundError = require('../errors/not_found_error');
-const ConflictError = require('../errors/conflict_error');
 const {
-  UNAUTHORIZED_ERROR,
   INTERNAL_SERVER_ERROR,
 } = require('../utils/constants');
 
@@ -14,13 +11,16 @@ module.exports.errorMiddleware = (error, _req, res, next) => {
     return next(new BadRequestError('Ошибка валидации'));
   }
 
-  if (error.code === 11000) {
-    return next(new ConflictError('Пользователь с такой почтой уже зарегистрирован'));
-  }
+  /* if (error.code === 11000) {
+    //return next(new ConflictError('Пользователь с такой почтой уже зарегистрирован'));
+  } */
 
-  if (error.statusCode === UNAUTHORIZED_ERROR) {
-    return next(new UnauthorizedError('Неправильные почта или пароль'));
-  }
+  /*  if (error.statusCode === UNAUTHORIZED_ERROR) {
+     console.log(1)
+     return res
+       .status(UNAUTHORIZED_ERROR)
+       .send({ message: 'Неправильные почта или пароль' });
+   } */
 
   if (error instanceof mongoose.Error.CastError) {
     return next(new BadRequestError('Передан некорректный id'));
@@ -32,6 +32,6 @@ module.exports.errorMiddleware = (error, _req, res, next) => {
 
   res
     .status(INTERNAL_SERVER_ERROR)
-    .send({ message: 'На сервере произошла ошибка center' });
+    .send({ message: 'На сервере произошла ошибка' });
   next();
 };

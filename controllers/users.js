@@ -5,6 +5,8 @@ const {
   OK_STATUS,
   CREATED_SUCCESS_STATUS,
   NOT_FOUND_ERROR,
+  UNAUTHORIZED_ERROR,
+  CONFLICT_ERROR,
 } = require('../utils/constants');
 
 module.exports.createUser = (req, res, next) => {
@@ -22,7 +24,9 @@ module.exports.createUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      next(err);
+      res
+        .status(CONFLICT_ERROR)
+        .send({ message: err.message });
     })
     .catch(next);
 };
@@ -41,7 +45,9 @@ module.exports.login = (req, res, next) => {
       return res.status(OK_STATUS).send({ token });
     })
     .catch((err) => {
-      next(err);
+      res
+        .status(UNAUTHORIZED_ERROR)
+        .send({ message: err.message });
     })
     .catch(next);
 };
