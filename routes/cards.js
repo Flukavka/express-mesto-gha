@@ -7,6 +7,7 @@ const {
   likeCard,
   dislikeCard,
 } = require('../controllers/cards');
+const { REG_EXP_LINK } = require('../utils/constants');
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get('/', getCards);
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(/(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)+\.(ru|com)))(:\d{2,5})?((\/.+)+)?\/?#?/),
+    link: Joi.string().required().pattern(REG_EXP_LINK),
     owner: Joi.string().length(24).hex(),
   }).unknown(true),
 }), express.json(), createCard);

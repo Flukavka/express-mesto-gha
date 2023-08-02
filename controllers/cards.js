@@ -1,10 +1,9 @@
-//  const mongoose = require('mongoose');
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not_found_error');
+const ForbiddenStatus = require('../errors/forbidden_status');
 const {
   OK_STATUS,
   CREATED_SUCCESS_STATUS,
-  FORBIDDEN_STATUS,
-  NOT_FOUND_ERROR,
 } = require('../utils/constants');
 
 module.exports.getCards = (_req, res, next) => {
@@ -12,8 +11,7 @@ module.exports.getCards = (_req, res, next) => {
     .then((cards) => res.status(OK_STATUS).send(cards))
     .catch((err) => {
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -32,12 +30,12 @@ module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
   // eslint-disable-next-line consistent-return
   .then((card) => {
     if (!card) {
-      res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
+      next(new NotFoundError('Нет карточки с таким id'));
     } else if (card.owner.toString() === req.user._id) {
-      return Card.findByIdAndRemove(req.params.cardId).then(() => res.status(OK_STATUS).send(card));
+      return Card.deleteOne(card).then(() => res.status(OK_STATUS).send(card));
     }
 
-    res.status(FORBIDDEN_STATUS).send({ message: 'Отказано в доступе' });
+    next(new ForbiddenStatus('Отказано в доступе'));
   })
   .catch((err) => {
     next(err);
@@ -51,16 +49,15 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   // eslint-disable-next-line consistent-return
   .then((card) => {
-    if (!card) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
+    if (card) {
+      return res.status(OK_STATUS).send(card);
     }
 
-    return res.status(OK_STATUS).send(card);
+    return next(new NotFoundError('Нет карточки с таким id'));
   })
   .catch((err) => {
     next(err);
-  })
-  .catch(next);
+  });
 
 module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
@@ -69,13 +66,12 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   // eslint-disable-next-line consistent-return
   .then((card) => {
-    if (!card) {
-      return res.status(NOT_FOUND_ERROR).send({ message: 'Нет карточки с таким id' });
+    if (card) {
+      return res.status(OK_STATUS).send(card);
     }
 
-    res.status(OK_STATUS).send(card);
+    return next(new NotFoundError('Нет карточки с таким id'));
   })
   .catch((err) => {
     next(err);
-  })
-  .catch(next);
+  });

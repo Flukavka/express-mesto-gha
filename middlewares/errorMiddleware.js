@@ -1,26 +1,8 @@
-const mongoose = require('mongoose');
-const BadRequestError = require('../errors/bad_request_error');
-const NotFoundError = require('../errors/not_found_error');
-const {
-  INTERNAL_SERVER_ERROR,
-} = require('../utils/constants');
-
 // eslint-disable-next-line consistent-return
-module.exports.errorMiddleware = (error, _req, res, next) => {
-  if (error instanceof mongoose.Error.ValidationError) {
-    return next(new BadRequestError('Ошибка валидации'));
-  }
+module.exports.errorMiddleware = (err, _req, res, next) => {
+  const statusCode = err.statusCode || 500;
 
-  if (error instanceof mongoose.Error.CastError) {
-    return next(new BadRequestError('Передан некорректный id'));
-  }
-
-  if (error instanceof mongoose.Error.DocumentNotFoundError) {
-    return next(new NotFoundError('Объект с указанным id отсутствует'));
-  }
-
-  res
-    .status(INTERNAL_SERVER_ERROR)
-    .send({ message: 'На сервере произошла ошибка' });
+  const message = statusCode === 500 ? 'На сервере произошла ошибка' : err.message;
+  res.status(statusCode).send({ message });
   next();
 };

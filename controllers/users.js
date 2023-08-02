@@ -1,12 +1,13 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const BadRequestError = require('../errors/bad_request_error');
+const ConflictError = require('../errors/conflict_error');
+const NotFoundError = require('../errors/not_found_error');
 const {
   OK_STATUS,
   CREATED_SUCCESS_STATUS,
-  NOT_FOUND_ERROR,
-  UNAUTHORIZED_ERROR,
-  CONFLICT_ERROR,
 } = require('../utils/constants');
 
 module.exports.createUser = (req, res, next) => {
@@ -24,11 +25,14 @@ module.exports.createUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      res
-        .status(CONFLICT_ERROR)
-        .send({ message: err.message });
-    })
-    .catch(next);
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Ошибка валидации'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с такой почтой уже существует'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -45,11 +49,12 @@ module.exports.login = (req, res, next) => {
       return res.status(OK_STATUS).send({ token });
     })
     .catch((err) => {
-      res
-        .status(UNAUTHORIZED_ERROR)
-        .send({ message: err.message });
-    })
-    .catch(next);
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Ошибка валидации'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getCurrentUserInfo = (req, res, next) => {
@@ -64,32 +69,29 @@ module.exports.getCurrentUserInfo = (req, res, next) => {
     })
     .catch((err) => {
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.getUsers = (_req, res, next) => User.find({})
   .then((users) => res.status(OK_STATUS).send(users))
   .catch((err) => {
     next(err);
-  })
-  .catch(next);
+  });
 
 module.exports.getUser = (req, res, next) => {
   const { id } = req.params;
 
   User.findById(id)
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND_ERROR).send({ message: 'Нет пользователя с таким id' });
+      if (user) {
+        return res.status(OK_STATUS).send(user);
       }
 
-      return res.status(OK_STATUS).send(user);
+      return next(new NotFoundError('Нет пользователя с таким id'));
     })
     .catch((err) => {
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateUserProfile = (req, res, next) => {
@@ -109,8 +111,7 @@ module.exports.updateUserProfile = (req, res, next) => {
     })
     .catch((err) => {
       next(err);
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
@@ -129,6 +130,5 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
     .catch((err) => {
       next(err);
-    })
-    .catch(next);
+    });
 };

@@ -1,5 +1,6 @@
 const express = require('express');
 const { celebrate, Joi } = require('celebrate');
+const { REG_EXP_LINK } = require('../utils/constants');
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.post('/', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     password: Joi.string().required().min(8),
-    avatar: Joi.string().pattern(/(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)+\.(ru|com)))(:\d{2,5})?((\/.+)+)?\/?#?/),
+    avatar: Joi.string().pattern(REG_EXP_LINK),
   }).unknown(true),
 }), createUser);
 
