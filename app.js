@@ -8,7 +8,7 @@ const routes = require('./routes/index');
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 // подключаемся к БД
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(DB_URL);
 
 //  запускаем приложение
 const app = express();
